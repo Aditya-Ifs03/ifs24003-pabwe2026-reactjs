@@ -1,8 +1,5 @@
 import { BASE_URL } from '../../../helpers/apiHelper';
 
-/**
- * API Registrasi Akun Baru
- */
 export const registerApi = async (payload) => {
   const response = await fetch(`${BASE_URL}/auth/register`, {
     method: 'POST',
@@ -26,9 +23,6 @@ export const registerApi = async (payload) => {
   return data;
 };
 
-/**
- * API Login Akun
- */
 export const loginApi = async (credentials) => {
   const response = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
