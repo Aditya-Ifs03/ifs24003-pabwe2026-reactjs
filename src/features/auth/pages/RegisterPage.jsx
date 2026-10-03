@@ -1,84 +1,133 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import useInput from '../../../hooks/useInput';
 import { asyncAuthRegister, resetAuthStates } from '../states/authSlice';
-import { showSuccessDialog } from '../../../helpers/toolsHelper';
+import { showSuccessDialog, showErrorDialog } from '../../../helpers/toolsHelper';
 
 const RegisterPage = () => {
-  const [name, handleNameChange] = useInput('');
-  const [email, handleEmailChange] = useInput('');
-  const [password, handlePasswordChange] = useInput('');
+  const [name, onNameChange] = useInput('');
+  const [email, onEmailChange] = useInput('');
+  const [password, onPasswordChange] = useInput('');
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthRegister } = useSelector((state) => state.auth);
 
+  // Mengambil state dari Redux authSlice
+  const { loading, error, successMessage } = useSelector((state) => state.auth || {});
+
+  // Reset pesan status saat komponen dimuat pertama kali
   useEffect(() => {
-    if (isAuthRegister === 'success') {
-      showSuccessDialog('Registrasi Berhasil! Silakan Login.');
+    if (dispatch && resetAuthStates) {
+      dispatch(resetAuthStates());
+    }
+  }, [dispatch]);
+
+  // Efek ketika registrasi berhasil atau gagal
+  useEffect(() => {
+    if (successMessage) {
+      if (showSuccessDialog) {
+        showSuccessDialog(successMessage);
+      } else {
+        alert(successMessage);
+      }
       dispatch(resetAuthStates());
       navigate('/auth/login');
     }
-  }, [isAuthRegister, navigate, dispatch]);
 
-  const onSubmit = (e) => {
+    if (error) {
+      if (showErrorDialog) {
+        showErrorDialog(error);
+      } else {
+        alert(error);
+      }
+      dispatch(resetAuthStates());
+    }
+  }, [successMessage, error, dispatch, navigate]);
+
+  const onSubmitHandler = (e) => {
     e.preventDefault();
+
+    // Validasi sederhana sebelum kirim
+    if (!name || !email || !password) {
+      if (showErrorDialog) {
+        showErrorDialog('Semua kolom wajib diisi!');
+      } else {
+        alert('Semua kolom wajib diisi!');
+      }
+      return;
+    }
+
+    // Kirim data registrasi
     dispatch(asyncAuthRegister({ name, email, password }));
   };
 
   return (
-    <div>
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Daftar Akun</h2>
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-          <input 
-            type="text" 
-            value={name} 
-            onChange={handleNameChange} 
-            required 
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border" 
-            placeholder="Masukkan nama"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Email</label>
-          <input 
-            type="email" 
-            value={email} 
-            onChange={handleEmailChange} 
-            required 
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border" 
-            placeholder="email@contoh.com"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Kata Sandi</label>
-          <input 
-            type="password" 
-            value={password} 
-            onChange={handlePasswordChange} 
-            required 
-            minLength={6}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border" 
-            placeholder="Minimal 6 karakter"
-          />
-        </div>
-        <button 
-          type="submit" 
-          disabled={isAuthRegister === 'pending'}
-          className="w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
-        >
-          {isAuthRegister === 'pending' ? 'Mendaftar...' : 'Daftar'}
-        </button>
-      </form>
-      <p className="mt-4 text-center text-sm text-gray-600">
-        Sudah punya akun? <Link to="/auth/login" className="text-blue-600 font-medium hover:underline">Masuk di sini</Link>
-      </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Daftar Akun</h2>
+
+        <form onSubmit={onSubmitHandler} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nama Lengkap
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={onNameChange}
+              placeholder="Masukkan nama lengkap"
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={onEmailChange}
+              placeholder="nama@gmail.com"
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={onPasswordChange}
+              placeholder="••••••••"
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {loading ? 'Memproses...' : 'Daftar'}
+          </button>
+        </form>
+
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Sudah punya akun?{' '}
+          <Link to="/auth/login" className="text-blue-600 hover:underline">
+            Masuk di sini
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };
 
-export default RegisterPage;    
-
-  
+export default RegisterPage;
