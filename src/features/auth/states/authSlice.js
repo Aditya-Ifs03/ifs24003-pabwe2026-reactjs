@@ -83,4 +83,8 @@ const authSlice = createSlice({
 });
 
 export const { logout, clearAuthStatus } = authSlice.actions;
+
+// Ekspor alias authLogout agar mendukung NavbarComponent.jsx
+export const authLogout = logout;
+
 export default authSlice.reducer;
