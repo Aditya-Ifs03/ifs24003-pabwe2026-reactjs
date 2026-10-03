@@ -1,71 +1,86 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { login, register } from '../api/authApi';
-import { putAccessToken, getAccessToken } from '../../../helpers/apiHelper';
-import { showErrorDialog } from '../../../helpers/toolsHelper';
+import { loginApi, registerApi } from '../api/authApi';
 
-// Async Thunks
-export const asyncAuthLogin = createAsyncThunk(
-  'auth/login',
+// Async Thunk untuk Register
+export const asyncRegister = createAsyncThunk(
+  'auth/asyncRegister',
   async (payload, { rejectWithValue }) => {
     try {
-      const response = await login(payload);
-      putAccessToken(response.data.token);
-      return response.data;
+      const response = await registerApi(payload);
+      return response;
     } catch (error) {
-      showErrorDialog(error.message);
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.message || 'Registrasi gagal.');
     }
   }
 );
 
-export const asyncAuthRegister = createAsyncThunk(
-  'auth/register',
-  async (payload, { rejectWithValue }) => {
+// Async Thunk untuk Login
+export const asyncLogin = createAsyncThunk(
+  'auth/asyncLogin',
+  async (credentials, { rejectWithValue }) => {
     try {
-      const response = await register(payload);
-      return response.data;
+      const response = await loginApi(credentials);
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      return response;
     } catch (error) {
-      showErrorDialog(error.message);
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.message || 'Login gagal.');
     }
   }
 );
 
-// Slice
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    authUser: getAccessToken() ? true : null, // Sederhana: jika ada token, anggap login
-    isAuthLogin: 'idle', // idle | pending | success | failed
-    isAuthRegister: 'idle',
-    isAuthLogout: 'idle',
+    user: null,
+    token: localStorage.getItem('token') || null,
+    loading: false,
+    error: null,
+    successMessage: null,
   },
   reducers: {
-    authLogout: (state) => {
-      putAccessToken(null);
-      state.authUser = null;
-      state.isAuthLogout = 'success';
+    logout: (state) => {
+      localStorage.removeItem('token');
+      state.user = null;
+      state.token = null;
     },
-    resetAuthStates: (state) => {
-      state.isAuthLogin = 'idle';
-      state.isAuthRegister = 'idle';
-    }
+    clearAuthStatus: (state) => {
+      state.error = null;
+      state.successMessage = null;
+    },
   },
   extraReducers: (builder) => {
     builder
-      // Login
-      .addCase(asyncAuthLogin.pending, (state) => { state.isAuthLogin = 'pending'; })
-      .addCase(asyncAuthLogin.fulfilled, (state, action) => {
-        state.isAuthLogin = 'success';
-        state.authUser = true;
-      })
-      .addCase(asyncAuthLogin.rejected, (state) => { state.isAuthLogin = 'failed'; })
       // Register
-      .addCase(asyncAuthRegister.pending, (state) => { state.isAuthRegister = 'pending'; })
-      .addCase(asyncAuthRegister.fulfilled, (state) => { state.isAuthRegister = 'success'; })
-      .addCase(asyncAuthRegister.rejected, (state) => { state.isAuthRegister = 'failed'; });
-  }
+      .addCase(asyncRegister.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(asyncRegister.fulfilled, (state, action) => {
+        state.loading = false;
+        state.successMessage = action.payload.message || 'Registrasi berhasil!';
+      })
+      .addCase(asyncRegister.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Login
+      .addCase(asyncLogin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(asyncLogin.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.data?.user || null;
+        state.token = action.payload.data?.token || null;
+      })
+      .addCase(asyncLogin.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  },
 });
 
-export const { authLogout, resetAuthStates } = authSlice.actions;
+export const { logout, clearAuthStatus } = authSlice.actions;
 export default authSlice.reducer;

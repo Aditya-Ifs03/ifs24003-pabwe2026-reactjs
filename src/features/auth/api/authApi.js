@@ -1,7 +1,7 @@
 import { BASE_URL } from '../../../helpers/apiHelper';
 
 /**
- * API untuk Register Akun Baru
+ * API untuk Registrasi Akun Baru
  */
 export const registerApi = async (payload) => {
   const response = await fetch(`${BASE_URL}/auth/register`, {
@@ -14,7 +14,7 @@ export const registerApi = async (payload) => {
 
   const contentType = response.headers.get('content-type');
   if (!contentType || !contentType.includes('application/json')) {
-    throw new Error('Gagal terhubung ke API backend. Silakan coba beberapa saat lagi.');
+    throw new Error('Gagal terhubung ke API Delcom. Respons server bukan JSON.');
   }
 
   const data = await response.json();
@@ -40,7 +40,7 @@ export const loginApi = async (credentials) => {
 
   const contentType = response.headers.get('content-type');
   if (!contentType || !contentType.includes('application/json')) {
-    throw new Error('Gagal terhubung ke API backend.');
+    throw new Error('Gagal terhubung ke API Delcom. Respons server bukan JSON.');
   }
 
   const data = await response.json();
