@@ -1,15 +1,53 @@
-import { apiFetch } from '../../../helpers/apiHelper';
+import { BASE_URL } from '../../../helpers/apiHelper';
 
-export const login = async ({ email, password }) => {
-  return await apiFetch('/auth/login', {
+/**
+ * API untuk Register Akun Baru
+ */
+export const registerApi = async (payload) => {
+  const response = await fetch(`${BASE_URL}/auth/register`, {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
   });
+
+  const contentType = response.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    throw new Error('Gagal terhubung ke API backend. Silakan coba beberapa saat lagi.');
+  }
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Pendaftaran gagal.');
+  }
+
+  return data;
 };
 
-export const register = async ({ name, email, password }) => {
-  return await apiFetch('/auth/register', {
+/**
+ * API untuk Login Akun
+ */
+export const loginApi = async (credentials) => {
+  const response = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
-    body: JSON.stringify({ name, email, password }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(credentials),
   });
+
+  const contentType = response.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    throw new Error('Gagal terhubung ke API backend.');
+  }
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Login gagal.');
+  }
+
+  return data;
 };

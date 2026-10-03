@@ -1,39 +1,40 @@
-export const getAccessToken = () => {
-  return localStorage.getItem('accessToken');
-};
+// Menentukan BASE_URL dengan fallback otomatis ke URL Delcom jika Environment Variable tidak terbaca
+export const BASE_URL = 
+  import.meta.env.VITE_DELCOM_BASEURL || 
+  import.meta.env.DELCOM_BASEURL || 
+  'https://open-api.delcom.org/api/v1';
 
-export const putAccessToken = (token) => {
-  if (token) {
-    localStorage.setItem('accessToken', token);
-  } else {
-    localStorage.removeItem('accessToken');
-  }
-};
+/**
+ * Helper dasar untuk melakukan HTTP Request ke API
+ */
+export const fetchWithConfig = async (endpoint, options = {}) => {
+  const token = localStorage.getItem('token');
 
-export const apiFetch = async (endpoint, options = {}) => {
-  const token = getAccessToken();
   const headers = {
     'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  // Memastikan endpoint diawali dengan /
+  const formattedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
+  const response = await fetch(`${BASE_URL}${formattedEndpoint}`, {
+    ...options,
+    headers,
+  });
+
+  // Mencegah error Parsing JSON jika server mengembalikan halaman HTML
+  const contentType = response.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    throw new Error('Server mengembalikan respon non-JSON. Pastikan URL API sudah benar.');
   }
 
-  // Menggunakan konstanta DELCOM_BASEURL yang telah didefinisikan di vite.config.js
-  const url = `${DELCOM_BASEURL}${endpoint}`;
+  const data = await response.json();
 
-  try {
-    const response = await fetch(url, { ...options, headers });
-    const responseJson = await response.json();
-
-    if (!response.ok) {
-      throw new Error(responseJson.message || 'Terjadi kesalahan pada server');
-    }
-
-    return responseJson;
-  } catch (error) {
-    throw error;
+  if (!response.ok) {
+    throw new Error(data.message || 'Terjadi kesalahan pada request.');
   }
+
+  return data;
 };
