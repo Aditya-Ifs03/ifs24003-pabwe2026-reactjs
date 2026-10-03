@@ -1,3 +1,18 @@
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { getAccessToken } from './helpers/apiHelper';
+
+// Komponen Proteksi Rute (mengecek token langsung)
+const ProtectedRoute = ({ children }) => {
+  const token = getAccessToken() || localStorage.getItem('token');
+
+  if (!token) {
+    return <Navigate to="/auth/login" replace />;
+  }
+
+  return children;
+};
+
 import { Routes, Route } from 'react-router-dom';
 
 // Layouts

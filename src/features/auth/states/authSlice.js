@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { loginApi, registerApi } from '../api/authApi';
 
-// Async Thunk untuk Register
 export const asyncRegister = createAsyncThunk(
   'auth/asyncRegister',
   async (payload, { rejectWithValue }) => {
@@ -14,14 +13,20 @@ export const asyncRegister = createAsyncThunk(
   }
 );
 
-// Async Thunk untuk Login
 export const asyncLogin = createAsyncThunk(
   'auth/asyncLogin',
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await loginApi(credentials);
-      if (response.data && response.data.token) {
-        localStorage.setItem('token', response.data.token);
+      // Ekstrak token dari berbagai kemungkinan struktur respon API
+      const token =
+        response?.data?.token ||
+        response?.data?.accessToken ||
+        response?.token ||
+        response?.accessToken;
+
+      if (token) {
+        localStorage.setItem('token', token);
       }
       return response;
     } catch (error) {
@@ -30,7 +35,6 @@ export const asyncLogin = createAsyncThunk(
   }
 );
 
-// Alias Async Thunk agar mendukung LoginPage.jsx & RegisterPage.jsx
 export const asyncAuthRegister = asyncRegister;
 export const asyncAuthLogin = asyncLogin;
 
@@ -60,7 +64,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Register
       .addCase(asyncRegister.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -73,15 +76,18 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Login
       .addCase(asyncLogin.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(asyncLogin.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.data?.user || null;
-        state.token = action.payload.data?.token || null;
+        const token =
+          action.payload?.data?.token ||
+          action.payload?.data?.accessToken ||
+          action.payload?.token;
+        state.token = token || null;
+        state.user = action.payload?.data?.user || null;
       })
       .addCase(asyncLogin.rejected, (state, action) => {
         state.loading = false;
@@ -91,8 +97,5 @@ const authSlice = createSlice({
 });
 
 export const { logout, clearAuthStatus, resetAuthStates } = authSlice.actions;
-
-// Alias ekspor pendukung
 export const authLogout = logout;
-
 export default authSlice.reducer;
