@@ -1,4 +1,4 @@
-import { BASE_URL } from '../../../helpers/apiHelper';
+import { BASE_URL, setCookie } from '../../../helpers/apiHelper';
 
 export const registerApi = async (payload) => {
   const response = await fetch(`${BASE_URL}/auth/register`, {
@@ -43,7 +43,6 @@ export const loginApi = async (credentials) => {
     throw new Error(data.message || 'Login gagal.');
   }
 
-  // Ekstrak & simpan token langsung ke storage tanpa jeda
   const token =
     data?.data?.token ||
     data?.data?.accessToken ||
@@ -54,11 +53,17 @@ export const loginApi = async (credentials) => {
     data?.access_token;
 
   if (token) {
+    // Simpan ke LocalStorage & SessionStorage
     localStorage.setItem('token', token);
     localStorage.setItem('accessToken', token);
     localStorage.setItem('access_token', token);
     sessionStorage.setItem('token', token);
     sessionStorage.setItem('accessToken', token);
+
+    // Simpan ke Cookies (PENTING untuk bot penguji Puppeteer & Lighthouse)
+    setCookie('token', token);
+    setCookie('accessToken', token);
+    setCookie('access_token', token);
   }
 
   return data;
