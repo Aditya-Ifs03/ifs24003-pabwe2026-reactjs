@@ -9,12 +9,15 @@ import RegisterPage from './features/auth/pages/RegisterPage';
 // Import Komponen Navbar
 import NavbarComponent from './features/lost-founds/components/NavbarComponent';
 
-// ProtectedRoute ditulis langsung di sini (tanpa perlu buat file/folder baru)
+// ProtectedRoute mengecek ketersediaan token secara langsung
 const ProtectedRoute = ({ children }) => {
   const token =
-    getAccessToken() ||
     localStorage.getItem('token') ||
-    localStorage.getItem('accessToken');
+    localStorage.getItem('accessToken') ||
+    localStorage.getItem('access_token') ||
+    sessionStorage.getItem('token') ||
+    sessionStorage.getItem('accessToken') ||
+    getAccessToken();
 
   if (!token) {
     return <Navigate to="/auth/login" replace />;

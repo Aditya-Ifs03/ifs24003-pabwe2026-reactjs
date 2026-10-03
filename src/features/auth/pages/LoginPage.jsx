@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import useInput from '../../../hooks/useInput';
 import { asyncAuthLogin, resetAuthStates } from '../states/authSlice';
-import { showSuccessDialog, showErrorDialog } from '../../../helpers/toolsHelper';
+import { showErrorDialog } from '../../../helpers/toolsHelper';
 
 const LoginPage = () => {
   const [email, onEmailChange] = useInput('');
@@ -21,14 +21,18 @@ const LoginPage = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (token || user) {
-      if (showSuccessDialog) {
-        showSuccessDialog('Login berhasil!');
-      }
+    const storedToken =
+      token ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('accessToken') ||
+      sessionStorage.getItem('token');
+
+    if (storedToken || user) {
       if (dispatch && resetAuthStates) {
         dispatch(resetAuthStates());
       }
-      navigate('/');
+      // Langsung navigasi ke rute terproteksi
+      navigate('/', { replace: true });
     }
 
     if (error) {

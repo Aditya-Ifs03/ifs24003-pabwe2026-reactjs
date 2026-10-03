@@ -43,5 +43,23 @@ export const loginApi = async (credentials) => {
     throw new Error(data.message || 'Login gagal.');
   }
 
+  // Ekstrak & simpan token langsung ke storage tanpa jeda
+  const token =
+    data?.data?.token ||
+    data?.data?.accessToken ||
+    data?.data?.access_token ||
+    (typeof data?.data === 'string' ? data?.data : null) ||
+    data?.token ||
+    data?.accessToken ||
+    data?.access_token;
+
+  if (token) {
+    localStorage.setItem('token', token);
+    localStorage.setItem('accessToken', token);
+    localStorage.setItem('access_token', token);
+    sessionStorage.setItem('token', token);
+    sessionStorage.setItem('accessToken', token);
+  }
+
   return data;
 };
