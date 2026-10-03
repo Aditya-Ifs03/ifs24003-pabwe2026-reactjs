@@ -1,14 +1,21 @@
-// URL Base Backend Open API Delcom (dengan Fallback Otomatis)
+// URL Backend Open API Delcom
 export const BASE_URL =
   import.meta.env.VITE_DELCOM_BASEURL ||
   import.meta.env.DELCOM_BASEURL ||
   'https://open-api.delcom.org/api/v1';
 
 /**
- * Helper umum untuk request API dengan validasi respons JSON
+ * Helper untuk mengambil Access Token dari LocalStorage
  */
-export const fetchWithConfig = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('token');
+export const getAccessToken = () => {
+  return localStorage.getItem('token') || localStorage.getItem('accessToken');
+};
+
+/**
+ * Helper utama pemanggilan API (apiFetch)
+ */
+export const apiFetch = async (endpoint, options = {}) => {
+  const token = getAccessToken();
 
   const headers = {
     'Content-Type': 'application/json',
@@ -24,11 +31,11 @@ export const fetchWithConfig = async (endpoint, options = {}) => {
     headers,
   });
 
-  // Mencegah error Parsing JSON jika server hosting mengembalikan file HTML
+  // Memastikan respon yang diterima berbentuk JSON, bukan HTML fallback dari hosting
   const contentType = response.headers.get('content-type');
   if (!contentType || !contentType.includes('application/json')) {
     throw new Error(
-      `Gagal terhubung ke API Delcom. Server mengembalikan respon non-JSON (${response.status}).`
+      `Gagal terhubung ke API Delcom. Respons server bukan JSON (${response.status}).`
     );
   }
 
@@ -40,3 +47,6 @@ export const fetchWithConfig = async (endpoint, options = {}) => {
 
   return data;
 };
+
+// Alias fetchWithConfig agar mendukung file lain yang menggunakan nama fungsi ini
+export const fetchWithConfig = apiFetch;
