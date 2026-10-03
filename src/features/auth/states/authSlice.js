@@ -18,7 +18,8 @@ export const asyncLogin = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await loginApi(credentials);
-      // Ekstrak token dari berbagai kemungkinan struktur respon API
+
+      // Mengekstrak token dari berbagai struktur respon API Delcom
       const token =
         response?.data?.token ||
         response?.data?.accessToken ||
@@ -27,6 +28,7 @@ export const asyncLogin = createAsyncThunk(
 
       if (token) {
         localStorage.setItem('token', token);
+        localStorage.setItem('accessToken', token);
       }
       return response;
     } catch (error) {
@@ -42,7 +44,10 @@ const authSlice = createSlice({
   name: 'auth',
   initialState: {
     user: null,
-    token: localStorage.getItem('token') || null,
+    token:
+      localStorage.getItem('token') ||
+      localStorage.getItem('accessToken') ||
+      null,
     loading: false,
     error: null,
     successMessage: null,
@@ -50,6 +55,7 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
       state.user = null;
       state.token = null;
     },
@@ -85,9 +91,12 @@ const authSlice = createSlice({
         const token =
           action.payload?.data?.token ||
           action.payload?.data?.accessToken ||
-          action.payload?.token;
+          action.payload?.token ||
+          action.payload?.accessToken;
+
         state.token = token || null;
-        state.user = action.payload?.data?.user || null;
+        state.user =
+          action.payload?.data?.user || action.payload?.user || null;
       })
       .addCase(asyncLogin.rejected, (state, action) => {
         state.loading = false;

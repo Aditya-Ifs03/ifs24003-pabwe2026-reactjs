@@ -2,9 +2,19 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { getAccessToken } from './helpers/apiHelper';
 
-// Komponen Proteksi Rute (mengecek token langsung)
+// Import Halaman Auth
+import LoginPage from './features/auth/pages/LoginPage';
+import RegisterPage from './features/auth/pages/RegisterPage';
+
+// Import Komponen Navbar
+import NavbarComponent from './features/lost-founds/components/NavbarComponent';
+
+// ProtectedRoute ditulis langsung di sini (tanpa perlu buat file/folder baru)
 const ProtectedRoute = ({ children }) => {
-  const token = getAccessToken() || localStorage.getItem('token');
+  const token =
+    getAccessToken() ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('accessToken');
 
   if (!token) {
     return <Navigate to="/auth/login" replace />;
@@ -13,36 +23,62 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-import { Routes, Route } from 'react-router-dom';
-
-// Layouts
-import AuthLayout from './features/auth/layouts/AuthLayout';
-import LostFoundLayout from './features/lost-founds/layouts/LostFoundLayout';
-
-// Pages
-import LoginPage from './features/auth/pages/LoginPage';
-import RegisterPage from './features/auth/pages/RegisterPage';
-import HomePage from './features/lost-founds/pages/HomePage';
-import DetailPage from './features/lost-founds/pages/DetailPage';
-import UsersPage from './features/users/pages/UsersPage';
-import ProfilePage from './features/users/pages/ProfilePage';
+// Layout Komponen Halaman Utama/Terproteksi
+const DummyPage = ({ title }) => (
+  <div className="min-h-screen bg-gray-50">
+    <NavbarComponent />
+    <main className="p-8 max-w-7xl mx-auto">
+      <h1 className="text-3xl font-bold text-gray-800 mb-4">{title}</h1>
+      <p className="text-gray-600">
+        Selamat datang di platform Delcom Lost & Found.
+      </p>
+    </main>
+  </div>
+);
 
 function App() {
   return (
     <Routes>
-      {/* Auth Routes */}
-      <Route path="/auth" element={<AuthLayout />}>
-        <Route path="login" element={<LoginPage />} />
-        <Route path="register" element={<RegisterPage />} />
-      </Route>
+      {/* Path Publik */}
+      <Route path="/auth/login" element={<LoginPage />} />
+      <Route path="/auth/register" element={<RegisterPage />} />
 
-      {/* Protected Dashboard Routes */}
-      <Route path="/" element={<LostFoundLayout />}>
-        <Route index element={<HomePage />} />
-        <Route path="lost-founds/:id" element={<DetailPage />} />
-        <Route path="users" element={<UsersPage />} />
-        <Route path="profile" element={<ProfilePage />} />
-      </Route>
+      {/* Path Terproteksi (Wajib Login) */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <DummyPage title="Halaman Utama" />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/lost-founds"
+        element={
+          <ProtectedRoute>
+            <DummyPage title="Daftar Barang Hilang" />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/lost-founds/add"
+        element={
+          <ProtectedRoute>
+            <DummyPage title="Tambah Laporan Barang" />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <DummyPage title="Profil Pengguna" />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Fallback Rute */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
