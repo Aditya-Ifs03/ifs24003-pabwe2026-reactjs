@@ -1,8 +1,5 @@
 export const BASE_URL = 'https://open-api.delcom.org/api/v1';
 
-/**
- * Helper untuk membaca Cookie
- */
 export const getCookie = (name) => {
   if (typeof document === 'undefined') return null;
   const value = `; ${document.cookie}`;
@@ -11,18 +8,12 @@ export const getCookie = (name) => {
   return null;
 };
 
-/**
- * Helper untuk menyimpan Cookie
- */
 export const setCookie = (name, value, days = 7) => {
   if (typeof document === 'undefined') return;
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
 };
 
-/**
- * Helper mengambil token dari SEMUA tempat (LocalStorage, SessionStorage, & Cookie)
- */
 export const getAccessToken = () => {
   if (typeof window === 'undefined') return null;
   return (
