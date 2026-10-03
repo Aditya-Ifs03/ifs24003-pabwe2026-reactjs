@@ -12,17 +12,14 @@ const LoginPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Mengambil state dari Redux authSlice
   const { token, user, loading, error } = useSelector((state) => state.auth || {});
 
-  // Reset status pesan saat halaman dimuat
   useEffect(() => {
     if (dispatch && resetAuthStates) {
       dispatch(resetAuthStates());
     }
   }, [dispatch]);
 
-  // Efek jika login berhasil (token/user terisi) atau gagal
   useEffect(() => {
     if (token || user) {
       if (showSuccessDialog) {
@@ -31,7 +28,6 @@ const LoginPage = () => {
       if (dispatch && resetAuthStates) {
         dispatch(resetAuthStates());
       }
-      // Arahkan ke halaman utama / dashboard setelah login
       navigate('/');
     }
 
@@ -59,7 +55,6 @@ const LoginPage = () => {
       return;
     }
 
-    // Kirim kredensial ke API Delcom
     dispatch(asyncAuthLogin({ email, password }));
   };
 
@@ -70,10 +65,11 @@ const LoginPage = () => {
 
         <form onSubmit={onSubmitHandler} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="login-email-input" className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
             <input
+              id="login-email-input"
               type="email"
               value={email}
               onChange={onEmailChange}
@@ -84,10 +80,11 @@ const LoginPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="login-password-input" className="block text-sm font-medium text-gray-700 mb-1">
               Kata Sandi
             </label>
             <input
+              id="login-password-input"
               type="password"
               value={password}
               onChange={onPasswordChange}
@@ -98,6 +95,7 @@ const LoginPage = () => {
           </div>
 
           <button
+            id="login-submit-button"
             type="submit"
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50 cursor-pointer"
