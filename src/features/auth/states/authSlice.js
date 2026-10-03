@@ -30,6 +30,10 @@ export const asyncLogin = createAsyncThunk(
   }
 );
 
+// Alias Async Thunk agar mendukung LoginPage.jsx & RegisterPage.jsx
+export const asyncAuthRegister = asyncRegister;
+export const asyncAuthLogin = asyncLogin;
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
@@ -46,6 +50,10 @@ const authSlice = createSlice({
       state.token = null;
     },
     clearAuthStatus: (state) => {
+      state.error = null;
+      state.successMessage = null;
+    },
+    resetAuthStates: (state) => {
       state.error = null;
       state.successMessage = null;
     },
@@ -82,9 +90,9 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearAuthStatus } = authSlice.actions;
+export const { logout, clearAuthStatus, resetAuthStates } = authSlice.actions;
 
-// Ekspor alias authLogout agar mendukung NavbarComponent.jsx
+// Alias ekspor pendukung
 export const authLogout = logout;
 
 export default authSlice.reducer;
