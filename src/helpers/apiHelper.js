@@ -1,8 +1,11 @@
-// Hardcode BASE_URL langsung ke Server Open API Delcom
-export const BASE_URL = 'https://open-api.delcom.org/api/v1';
+// URL Base Backend Open API Delcom (dengan Fallback Otomatis)
+export const BASE_URL =
+  import.meta.env.VITE_DELCOM_BASEURL ||
+  import.meta.env.DELCOM_BASEURL ||
+  'https://open-api.delcom.org/api/v1';
 
 /**
- * Helper umum untuk request API dengan Token Authorization
+ * Helper umum untuk request API dengan validasi respons JSON
  */
 export const fetchWithConfig = async (endpoint, options = {}) => {
   const token = localStorage.getItem('token');
@@ -14,14 +17,19 @@ export const fetchWithConfig = async (endpoint, options = {}) => {
   };
 
   const formattedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const response = await fetch(`${BASE_URL}${formattedEndpoint}`, {
+  const fullUrl = `${BASE_URL}${formattedEndpoint}`;
+
+  const response = await fetch(fullUrl, {
     ...options,
     headers,
   });
 
+  // Mencegah error Parsing JSON jika server hosting mengembalikan file HTML
   const contentType = response.headers.get('content-type');
   if (!contentType || !contentType.includes('application/json')) {
-    throw new Error('Server mengembalikan respon non-JSON. Pastikan endpoint API benar.');
+    throw new Error(
+      `Gagal terhubung ke API Delcom. Server mengembalikan respon non-JSON (${response.status}).`
+    );
   }
 
   const data = await response.json();

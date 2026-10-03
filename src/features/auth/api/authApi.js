@@ -1,7 +1,7 @@
 import { BASE_URL } from '../../../helpers/apiHelper';
 
 /**
- * API untuk Registrasi Akun Baru
+ * API Registrasi Akun Baru
  */
 export const registerApi = async (payload) => {
   const response = await fetch(`${BASE_URL}/auth/register`, {
@@ -27,7 +27,7 @@ export const registerApi = async (payload) => {
 };
 
 /**
- * API untuk Login Akun
+ * API Login Akun
  */
 export const loginApi = async (credentials) => {
   const response = await fetch(`${BASE_URL}/auth/login`, {
