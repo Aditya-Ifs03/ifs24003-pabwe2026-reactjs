@@ -59,11 +59,15 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <main className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Masuk Akun</h2>
+        <header>
+          <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
+            Masuk Akun
+          </h1>
+        </header>
 
-        <form onSubmit={onSubmitHandler} className="space-y-4">
+        <form onSubmit={onSubmitHandler} className="space-y-4" aria-label="Form Login">
           <div>
             <label htmlFor="login-email-input" className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -75,6 +79,7 @@ const LoginPage = () => {
               onChange={onEmailChange}
               placeholder="aditya@gmail.com"
               required
+              aria-required="true"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -90,6 +95,7 @@ const LoginPage = () => {
               onChange={onPasswordChange}
               placeholder="••••••••"
               required
+              aria-required="true"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -98,20 +104,23 @@ const LoginPage = () => {
             id="login-submit-button"
             type="submit"
             disabled={loading}
+            aria-label="Tombol Masuk Akun"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50 cursor-pointer"
           >
             {loading ? 'Memproses...' : 'Masuk'}
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Belum punya akun?{' '}
-          <Link to="/auth/register" className="text-blue-600 hover:underline">
-            Daftar sekarang
-          </Link>
-        </p>
+        <nav aria-label="Navigasi Pendaftaran" className="mt-4 text-center text-sm text-gray-600">
+          <p>
+            Belum punya akun?{' '}
+            <Link to="/auth/register" className="text-blue-600 hover:underline">
+              Daftar sekarang
+            </Link>
+          </p>
+        </nav>
       </div>
-    </div>
+    </main>
   );
 };
 
